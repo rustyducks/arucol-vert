@@ -10,7 +10,7 @@ include_directories(include)
 add_executable(arucol_vert_calib src/main_calib.cpp)
 target_link_libraries(arucol_vert_calib ${OpenCV_LIBS})
 
-add_executable(arucol_vert src/main.cpp src/arucolVert.cpp src/cameraParams.cpp)
+add_executable(arucol_vert src/main.cpp src/arucolVert.cpp src/cameraParams.cpp src/arucolVertParams.cpp)
 target_link_libraries(arucol_vert ${OpenCV_LIBS})
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

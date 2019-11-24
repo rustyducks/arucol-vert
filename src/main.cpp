@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     }
     int cameraId;
     std::stringstream(argv[1]) >> cameraId;
-    arucol::ArucolVert av(cameraId, argv[2], withDisplay);
+    arucol::ArucolVert av(argv[1], argv[2], withDisplay);
     av.run();
 
 /*     cv::VideoCapture inputVideo;
