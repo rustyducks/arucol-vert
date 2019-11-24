@@ -36,4 +36,26 @@ cv::Vec3f rotationMatrixToEulerAngles(cv::Mat &R) {
   }
   return cv::Vec3f(x, y, z);
 }
+
+void tvecAndRvecToHomogeneousMatrix(const cv::Vec3d &tvec,
+                                           const cv::Vec3d &rvec, cv::Matx44d &homogeneousMatrix) {
+  cv::Matx33d rotMat;
+  cv::Rodrigues(rvec, rotMat);
+  homogeneousMatrix = cv::Matx44d(
+      rotMat(0, 0), rotMat(0, 1), rotMat(0, 2), tvec(0), 
+      rotMat(1, 0), rotMat(1, 1), rotMat(1, 2), tvec(1),
+      rotMat(2, 0), rotMat(2, 1), rotMat(2, 2), tvec(2), 
+      0.0, 0.0, 0.0, 1.0);
+}
+
+void homogeneousMatrixToTvecAndRvec(const cv::Matx44d& homogeneousMatrix, cv::Vec3d& tvec, cv::Vec3d& rvec){
+  cv::Matx33d rotMat(
+    homogeneousMatrix(0, 0), homogeneousMatrix(0, 1), homogeneousMatrix(0, 2),
+    homogeneousMatrix(1, 0), homogeneousMatrix(1, 1), homogeneousMatrix(1, 2),
+    homogeneousMatrix(2, 0), homogeneousMatrix(2, 1), homogeneousMatrix(2, 2));
+  cv::Rodrigues(rotMat, rvec);
+  tvec = cv::Vec3d(homogeneousMatrix(0, 3), homogeneousMatrix(1, 3), homogeneousMatrix(2, 3));
+}
+
+
 } // namespace arucol

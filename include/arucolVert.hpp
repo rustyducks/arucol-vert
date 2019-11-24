@@ -2,6 +2,7 @@
 #include <opencv2/videoio.hpp>
 #include <string>
 #include <unordered_set>
+#include <unordered_map>
 
 #include "cameraParams.hpp"
 
@@ -31,8 +32,9 @@ public:
   static void help();
 
 protected:
-    void acquireCentralMarker();
+    bool updateCentralMarker(const cv::Mat& image, cv::Mat& debugImage);
     sMarkers filterMarkers(const sMarkers& markers, const std::unordered_set<int>& whitelistIds) const;
+    size_t findPoses(const cv::Mat& image, cv::Mat& debugImage, std::unordered_map<int, cv::Matx44d>& poses) const;
 
 protected:
   eState state;
@@ -40,7 +42,8 @@ protected:
   bool withDisplay;
   cv::VideoCapture inputVideo;
   cv::Ptr<cv::aruco::Dictionary> dictionnary;
-  sPose centralMarkerPose;
+  cv::Matx44d centralMarkerPose;
+  cv::Matx44d centralMarkerPoseInv;
 };
 
 } // namespace arucol
