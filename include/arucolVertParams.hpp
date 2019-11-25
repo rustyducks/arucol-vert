@@ -19,6 +19,8 @@ double markerSize;
 
 double period;  // In ms
 
+cv::Matx44d refToCentralMarker;
+
 };
 } // namespace arucol
 #endif /* ARUCOLVERTPARAMS_HPP */

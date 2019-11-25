@@ -97,6 +97,7 @@ bool ArucolVert::updateCentralMarker(const cv::Mat &image,
     }
     tvecAndRvecToHomogeneousMatrix(tvecs[0], rvecs[0], centralMarkerPose);
     centralMarkerPoseInv = centralMarkerPose.inv();
+    refToCamera = params.refToCentralMarker * centralMarkerPoseInv;
     // std::cout << "Updating central marker pose: " << centralMarkerPose
     //          << std::endl;
     return true;
@@ -142,7 +143,7 @@ ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
   for (size_t i = 0; i < markers.ids.size(); i++) {
     cv::Matx44d camToMarker;
     tvecAndRvecToHomogeneousMatrix(tvecs[i], rvecs[i], camToMarker);
-    poses[markers.ids[i]] = centralMarkerPoseInv * camToMarker;
+    poses[markers.ids[i]] = refToCamera * camToMarker;
   }
 
   if (withDisplay) {
