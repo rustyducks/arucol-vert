@@ -7,11 +7,14 @@ include(CTest)
 enable_testing()
 
 include_directories(include)
+
 add_executable(arucol_vert_calib src/main_calib.cpp)
 target_link_libraries(arucol_vert_calib ${OpenCV_LIBS})
+target_compile_options(arucol_vert_calib PRIVATE -Wall -Wextra -pedantic -Werror)
 
 add_executable(arucol_vert src/main.cpp src/arucolVert.cpp src/cameraParams.cpp src/arucolVertParams.cpp)
 target_link_libraries(arucol_vert ${OpenCV_LIBS})
+target_compile_options(arucol_vert PRIVATE -Wall -Wextra -pedantic -Werror)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

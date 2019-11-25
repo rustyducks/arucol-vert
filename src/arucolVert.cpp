@@ -46,7 +46,6 @@ void ArucolVert::run() {
 
   std::cout << "Starting poses estimations" << std::endl;
   state = RUNNING;
-  size_t nMarkersFound;
   std::unordered_map<int, cv::Matx44d> markerPoses;
   std::chrono::time_point<std::chrono::system_clock> lastFrameTime, now;
   while (inputVideo.grab()) {
@@ -62,7 +61,7 @@ void ArucolVert::run() {
       img.copyTo(debugImg);
     }
     updateCentralMarker(img, debugImg);
-    nMarkersFound = findPoses(img, debugImg, markerPoses);
+    findPoses(img, debugImg, markerPoses);
     std::cout << markerPoses.size() << std::endl;
     for (auto &it : markerPoses) {
       cv::Vec3d rvec, tvec;
@@ -71,7 +70,7 @@ void ArucolVert::run() {
     }
     if (withDisplay) {
       cv::imshow("Output", debugImg);
-      char key = (char)cv::waitKey(10);
+      cv::waitKey(10);
     }
   }
 }
