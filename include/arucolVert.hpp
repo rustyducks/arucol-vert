@@ -1,3 +1,5 @@
+#ifndef ARUCOLVERT_HPP
+#define ARUCOLVERT_HPP
 #include <opencv2/aruco.hpp>
 #include <opencv2/videoio.hpp>
 #include <string>
@@ -48,6 +50,9 @@ protected:
   cv::Ptr<cv::aruco::Dictionary> dictionnary;
   cv::Matx44d centralMarkerPose;
   cv::Matx44d centralMarkerPoseInv;
+  cv::Matx44d refToCamera;
 };
 
 } // namespace arucol
+
+#endif /* ARUCOLVERT_HPP */

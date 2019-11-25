@@ -1,3 +1,5 @@
+#ifndef ARUCOLVERTPARAMS_HPP
+#define ARUCOLVERTPARAMS_HPP
 #include <opencv2/core/core.hpp>
 #include <unordered_set>
 
@@ -19,3 +21,4 @@ double period;  // In ms
 
 };
 } // namespace arucol
+#endif /* ARUCOLVERTPARAMS_HPP */

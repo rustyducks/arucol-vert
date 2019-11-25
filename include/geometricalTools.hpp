@@ -1,9 +1,12 @@
+#ifndef GEOMETRICALTOOLS_HPP
+#define GEOMETRICALTOOLS_HPP
 #include <opencv2/core/types.hpp>
+#include <opencv2/calib3d.hpp>
 
 namespace arucol {
 
 // Checks if a matrix is a valid rotation matrix.
-bool isRotationMatrix(cv::Mat &R) {
+inline bool isRotationMatrix(cv::Mat &R) {
   cv::Mat Rt;
   transpose(R, Rt);
   cv::Mat shouldBeIdentity = Rt * R;
@@ -15,7 +18,7 @@ bool isRotationMatrix(cv::Mat &R) {
 // Calculates rotation matrix to euler angles
 // The result is the same as MATLAB except the order
 // of the euler angles ( x and z are swapped ).
-cv::Vec3f rotationMatrixToEulerAngles(cv::Mat &R) {
+inline cv::Vec3f rotationMatrixToEulerAngles(cv::Mat &R) {
 
   assert(isRotationMatrix(R));
 
@@ -37,7 +40,7 @@ cv::Vec3f rotationMatrixToEulerAngles(cv::Mat &R) {
   return cv::Vec3f(x, y, z);
 }
 
-void tvecAndRvecToHomogeneousMatrix(const cv::Vec3d &tvec,
+inline void tvecAndRvecToHomogeneousMatrix(const cv::Vec3d &tvec,
                                            const cv::Vec3d &rvec, cv::Matx44d &homogeneousMatrix) {
   cv::Matx33d rotMat;
   cv::Rodrigues(rvec, rotMat);
@@ -48,7 +51,7 @@ void tvecAndRvecToHomogeneousMatrix(const cv::Vec3d &tvec,
       0.0, 0.0, 0.0, 1.0);
 }
 
-void homogeneousMatrixToTvecAndRvec(const cv::Matx44d& homogeneousMatrix, cv::Vec3d& tvec, cv::Vec3d& rvec){
+inline void homogeneousMatrixToTvecAndRvec(const cv::Matx44d& homogeneousMatrix, cv::Vec3d& tvec, cv::Vec3d& rvec){
   cv::Matx33d rotMat(
     homogeneousMatrix(0, 0), homogeneousMatrix(0, 1), homogeneousMatrix(0, 2),
     homogeneousMatrix(1, 0), homogeneousMatrix(1, 1), homogeneousMatrix(1, 2),
@@ -57,5 +60,15 @@ void homogeneousMatrixToTvecAndRvec(const cv::Matx44d& homogeneousMatrix, cv::Ve
   tvec = cv::Vec3d(homogeneousMatrix(0, 3), homogeneousMatrix(1, 3), homogeneousMatrix(2, 3));
 }
 
+inline void homogeneousMatrixFromTranslationRotation2D(const double x, const double y, const double orientation, cv::Matx44d& homogeneousMatrix){
+  homogeneousMatrix = cv::Matx44d(
+    cos(orientation), -sin(orientation), 0, x,
+    sin(orientation), cos(orientation), 0, y,
+    0.0, 0.0, 1.0, 0.0,
+    0.0, 0.0, 0.0, 1.0
+  );
+}
+
 
 } // namespace arucol
+#endif /* GEOMETRICALTOOLS_HPP */

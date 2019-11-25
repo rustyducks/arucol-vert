@@ -1,3 +1,5 @@
+#ifndef CAMERAPARAMS_HPP
+#define CAMERAPARAMS_HPP
 #include <opencv2/core/core.hpp>
 #include <string>
 
@@ -14,3 +16,4 @@ public:
 }; // class CameraParams
 
 } // namespace arucol
+#endif /* CAMERAPARAMS_HPP */
