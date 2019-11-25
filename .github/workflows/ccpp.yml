@@ -1,0 +1,21 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y libopencv-dev
+    - name: Build dir creation
+      run: mkdir build
+    - name: Cmake
+      working-directory: ./build
+      run: cmake ..
+    - name: make
+      working-directory: ./build
+      run: make
