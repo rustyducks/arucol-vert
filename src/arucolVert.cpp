@@ -17,8 +17,15 @@ ArucolVert::ArucolVert(const std::string &cameraParametersFilename,
     : state(IDLE), cameraParams(cameraParametersFilename),
       params(parametersFilename), withDisplay(withDisplay),
       dictionnary(cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_100)) {
-      
-  inputVideo.open(params.cameraId);
+
+  if (params.inputType == ArucolVertParams::CAMERA){    
+    inputVideo.open(params.cameraId);
+  }else{
+    inputVideo.open(params.videoFileName);
+  }
+  if (!inputVideo.isOpened()){
+    std::cout << "Unable to open video input." << std::endl;
+  }
 }
 
 ArucolVert::~ArucolVert() {}
