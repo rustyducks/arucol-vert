@@ -17,7 +17,7 @@ ArucolVert::ArucolVert(const std::string &cameraParametersFilename,
     : state(IDLE), cameraParams(cameraParametersFilename),
       params(parametersFilename), withDisplay(withDisplay),
       dictionnary(cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_100)) {
-
+      
   inputVideo.open(params.cameraId);
 }
 

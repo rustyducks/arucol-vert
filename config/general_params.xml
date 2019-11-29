@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <opencv_storage>
-    <cameraId>0</cameraId>
+    <!--<cameraId>1</cameraId>-->
+    <videoFile>video/video.h264</videoFile>
     <centralMarkerId>42</centralMarkerId>
     <centralMarkerSize>0.100</centralMarkerSize>  <!-- In m -->
     <centralMarkerPosition>1.500 0.750</centralMarkerPosition>  <!-- Reference frame to center of central marker, in meters -->

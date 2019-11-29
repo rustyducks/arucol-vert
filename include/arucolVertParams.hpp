@@ -4,23 +4,27 @@
 #include <unordered_set>
 
 namespace arucol {
+
 class ArucolVertParams {
 public:
   ArucolVertParams(const std::string &filename);
 
 public:
-unsigned int cameraId;
+  enum eVideoInput { CAMERA, VIDEO_FILE };
 
-int centralMarkerId;
-double centralMarkerSize;
+  eVideoInput inputType;
+  unsigned int cameraId;
+  std::string videoFileName;
 
-std::unordered_set<int> validMarkerIds;
-double markerSize;
+  int centralMarkerId;
+  double centralMarkerSize;
 
-double period;  // In ms
+  std::unordered_set<int> validMarkerIds;
+  double markerSize;
 
-cv::Matx44d refToCentralMarker;
+  double period; // In ms
 
+  cv::Matx44d refToCentralMarker;
 };
 } // namespace arucol
 #endif /* ARUCOLVERTPARAMS_HPP */
