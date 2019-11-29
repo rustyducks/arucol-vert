@@ -48,7 +48,11 @@ ArucolVertParams::ArucolVertParams(const std::string &filename) {
 
   double rate;
   fs["rate"] >> rate;
-  period = 1. / rate * 1000;
+  if (rate == 0) {
+    period = 0.0;
+  } else {
+    period = 1. / rate * 1000;
+  }
 
   fs.release();
 }
