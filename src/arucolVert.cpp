@@ -78,7 +78,13 @@ void ArucolVert::run() {
     }
     if (withDisplay) {
       cv::imshow("Output", debugImg);
-      cv::waitKey(10);
+      int pressedKey = cv::waitKey(10);
+      if (pressedKey == 32){
+        pressedKey = cv::waitKey(10);
+        while (pressedKey != 32){
+          pressedKey = cv::waitKey(100);
+        }
+      }
     }
   }
 }
