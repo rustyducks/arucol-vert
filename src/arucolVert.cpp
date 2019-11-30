@@ -18,12 +18,12 @@ ArucolVert::ArucolVert(const std::string &cameraParametersFilename,
       params(parametersFilename), withDisplay(withDisplay),
       dictionnary(cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_100)) {
 
-  if (params.inputType == ArucolVertParams::CAMERA){    
+  if (params.inputType == ArucolVertParams::CAMERA) {
     inputVideo.open(params.cameraId);
-  }else{
+  } else {
     inputVideo.open(params.videoFileName);
   }
-  if (!inputVideo.isOpened()){
+  if (!inputVideo.isOpened()) {
     std::cout << "Unable to open video input." << std::endl;
   }
 }
@@ -31,16 +31,17 @@ ArucolVert::ArucolVert(const std::string &cameraParametersFilename,
 ArucolVert::~ArucolVert() {}
 
 void ArucolVert::help() {
-  std::cout
-      << "ArucolVert Aruco pose estimator executable." << std::endl
-      << "Usage: ./arucol_vert CAMERA_PARAMETERS_FILE GENERAL_PARAMETERS_FILE [WITH_DISPLAY]"
-      << std::endl;
+  std::cout << "ArucolVert Aruco pose estimator executable." << std::endl
+            << "Usage: ./arucol_vert CAMERA_PARAMETERS_FILE "
+               "GENERAL_PARAMETERS_FILE [WITH_DISPLAY]"
+            << std::endl;
 }
 
 void ArucolVert::run() {
   state = AQCUIRING_CENTRAL_MARKER;
   cv::Mat img, debugImg;
-  std::cout << "Acquiring central marker, id: " << params.centralMarkerId << std::endl;
+  std::cout << "Acquiring central marker, id: " << params.centralMarkerId
+            << std::endl;
   while (inputVideo.grab()) {
     inputVideo.retrieve(img);
     if (withDisplay) {
@@ -87,7 +88,8 @@ bool ArucolVert::updateCentralMarker(const cv::Mat &image,
   std::vector<int> ids;
   std::vector<std::vector<cv::Point2f>> corners;
   cv::aruco::detectMarkers(image, dictionnary, corners, ids);
-  sMarkers centralMarker = filterMarkers({ids, corners}, {params.centralMarkerId});
+  sMarkers centralMarker =
+      filterMarkers({ids, corners}, {params.centralMarkerId});
 
   if (centralMarker.ids.size() == 1) {
     std::vector<cv::Vec3d> rvecs, tvecs;
@@ -109,7 +111,8 @@ bool ArucolVert::updateCentralMarker(const cv::Mat &image,
     //          << std::endl;
     return true;
   } else if (centralMarker.ids.size() > 1) {
-    std::cout << "Warning: Multiple central markers with id :" << params.centralMarkerId
+    std::cout << "Warning: Multiple central markers with id :"
+              << params.centralMarkerId
               << "found on the same frame. Not updating the pose" << std::endl;
     return false;
   }
@@ -136,16 +139,15 @@ ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
   std::vector<int> ids;
   std::vector<std::vector<cv::Point2f>> corners;
   cv::aruco::detectMarkers(image, dictionnary, corners, ids);
-  sMarkers markers =
-      filterMarkers({ids, corners}, params.validMarkerIds);
+  sMarkers markers = filterMarkers({ids, corners}, params.validMarkerIds);
   if (markers.ids.size() == 0) {
     std::cout << "No marker found" << std::endl;
     return 0;
   }
   std::vector<cv::Vec3d> rvecs, tvecs;
   cv::aruco::estimatePoseSingleMarkers(
-      markers.corners, params.markerSize, cameraParams.matrix, cameraParams.distortionCoeffs,
-      rvecs, tvecs);
+      markers.corners, params.markerSize, cameraParams.matrix,
+      cameraParams.distortionCoeffs, rvecs, tvecs);
 
   for (size_t i = 0; i < markers.ids.size(); i++) {
     cv::Matx44d camToMarker;
