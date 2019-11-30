@@ -6,6 +6,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <thread>
+#include <sstream>
 
 #include "geometricalTools.hpp"
 
@@ -155,14 +156,45 @@ ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
       markers.corners, params.markerSize, cameraParams.matrix,
       cameraParams.distortionCoeffs, rvecs, tvecs);
 
+  std::vector<cv::Matx44d> camToMarkers;
+  camToMarkers.reserve(markers.ids.size());
   for (size_t i = 0; i < markers.ids.size(); i++) {
     cv::Matx44d camToMarker;
     tvecAndRvecToHomogeneousMatrix(tvecs[i], rvecs[i], camToMarker);
     poses[markers.ids[i]] = refToCamera * camToMarker;
+    camToMarkers.push_back(camToMarker);
   }
 
   if (withDisplay) {
     cv::aruco::drawDetectedMarkers(debugImage, markers.corners, markers.ids);
+    if (markers.ids.size() > 0) {
+      std::vector<cv::Point3d> points;
+      std::vector<cv::Point2d> imgPoints;
+      cv::Point3d centerPose;
+      cv::Vec3d pose, rvec;
+      homogeneousMatrixToTvecAndRvec(centralMarkerPose, pose, rvec);
+      centerPose.x = pose[0];
+      centerPose.y = pose[1];
+      centerPose.z = pose[2];
+      points.push_back(centerPose);
+      for (size_t i = 0; i < markers.ids.size(); i++) {
+        homogeneousMatrixToTvecAndRvec(camToMarkers[i], pose, rvec);
+        cv::Point3d p(pose[0], pose[1], pose[2]);
+        points.push_back(p);
+      }
+
+      cv::projectPoints(points, std::vector<double>({0.0, 0.0, 0.0}),
+                        std::vector<double>({0.0, 0.0, 0.0}),
+                        cameraParams.matrix, cameraParams.distortionCoeffs,
+                        imgPoints);
+
+      for (size_t i = 1; i < imgPoints.size(); i++){
+        cv::line(debugImage, imgPoints[0], imgPoints[i], {0, 0, 255}, 2);
+        std::stringstream ss;
+        ss << "x:" << points[i].x << " y:" << points[i].y << " z:" << points[i].z;
+        cv::putText(debugImage, ss.str(), (imgPoints[0] + imgPoints[i])/2, cv::FONT_HERSHEY_SIMPLEX, 0.7, {0, 0, 255}, 2);
+      }
+    }
   }
 
   return poses.size();
