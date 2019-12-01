@@ -172,7 +172,7 @@ ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
       std::vector<cv::Point2d> imgPoints;
       cv::Point3d centerPose;
       cv::Vec3d pose, rvec;
-      homogeneousMatrixToTvecAndRvec(centralMarkerPose, pose, rvec);
+      homogeneousMatrixToTvecAndRvec(refToCamera.inv(), pose, rvec);
       centerPose.x = pose[0];
       centerPose.y = pose[1];
       centerPose.z = pose[2];
@@ -191,7 +191,8 @@ ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
       for (size_t i = 1; i < imgPoints.size(); i++){
         cv::line(debugImage, imgPoints[0], imgPoints[i], {0, 0, 255}, 2);
         std::stringstream ss;
-        ss << "x:" << points[i].x << " y:" << points[i].y << " z:" << points[i].z;
+        homogeneousMatrixToTvecAndRvec(poses[markers.ids[i-1]], pose, rvec);
+        ss << "x:" << pose[0] << " y:" << pose[1] << " z:" << pose[2];
         cv::putText(debugImage, ss.str(), (imgPoints[0] + imgPoints[i])/2, cv::FONT_HERSHEY_SIMPLEX, 0.7, {0, 0, 255}, 2);
       }
     }
