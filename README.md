@@ -1,6 +1,6 @@
 # Arucol Vert
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
-[![Build Status](https://github.com/rustyducks/arucol-vert/workflows/Ubuntu%2018.04%20Build/badge.svg)](https://github.com/rustyducks/arucol-vert/actions?query=workflow%3A%22Ubuntu+18.04+Build%22)
+[![Build Status](https://github.com/rustyducks/arucol-vert/workflows/Ubuntu%2018.04%20Build%20and%20Test/badge.svg)](https://github.com/rustyducks/arucol-vert/actions?query=workflow%3A%22Ubuntu+18.04+Build+and+Test%22)
 
 An executable to find the position of aruco markers relative to another one. Also includes a camera calibration executable.
 

@@ -1,4 +1,4 @@
-name: Ubuntu 18.04 Build
+name: Ubuntu 18.04 Build and Test
 
 on: [push]
 
@@ -15,7 +15,10 @@ jobs:
       run: mkdir build
     - name: Cmake
       working-directory: ./build
-      run: cmake ..
+      run: cmake -DENABLE_TESTS=ON ..
     - name: make
       working-directory: ./build
       run: make
+    - name: test
+      working-directory: ./build
+      run: ctest -V

@@ -3,8 +3,7 @@ project(arucol-vert VERSION 0.1.0)
 
 find_package(OpenCV REQUIRED)
 
-include(CTest)
-enable_testing()
+option(ENABLE_TESTS "Enable tests" ON)
 
 include_directories(include)
 
@@ -15,6 +14,12 @@ target_compile_options(arucol_vert_calib PRIVATE -Wall -Wextra -pedantic -Werror
 add_executable(arucol_vert src/main.cpp src/arucolVert.cpp src/cameraParams.cpp src/arucolVertParams.cpp)
 target_link_libraries(arucol_vert ${OpenCV_LIBS})
 target_compile_options(arucol_vert PRIVATE -Wall -Wextra -pedantic -Werror)
+
+### Testing ###
+if (${ENABLE_TESTS})
+    enable_testing()
+    include(${PROJECT_SOURCE_DIR}/test/CMakeLists.txt)
+endif()
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
