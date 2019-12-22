@@ -35,3 +35,7 @@ endif()
 add_executable(testParamFilesRead test/test_params.cpp src/cameraParams.cpp src/arucolVertParams.cpp)
 target_link_libraries(testParamFilesRead gtest_main ${OpenCV_LIBS})
 add_test(NAME testParamFilesRead COMMAND testParamFilesRead)
+
+add_executable(testGeometricalTools test/test_geometrical_tools.cpp)
+target_link_libraries(testGeometricalTools gtest_main ${OpenCV_LIBS})
+add_test(NAME testGeometricalTools COMMAND testGeometricalTools)
