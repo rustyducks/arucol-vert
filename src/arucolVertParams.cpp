@@ -39,6 +39,9 @@ ArucolVertParams::ArucolVertParams(const std::string &filename) {
   homogeneousMatrixFromTranslationRotation2D(
       centralMarkerPosition[0], centralMarkerPosition[1],
       centralMarkerOrientation, refToCentralMarker);
+  fs["centralMarkerDetectionBeforeStart"] >> numberOfCentralMarkerDetectionBeforeStart;
+  fs["averageFilterWeight"] >> averageFilterWeight;
+  fs["updateCentralMarkerOnline"] >> updateCentralMarkerWhileRunning;
 
   std::vector<int> _validMarkersIds;
   fs["markerIds"] >> _validMarkersIds;

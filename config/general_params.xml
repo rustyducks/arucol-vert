@@ -6,6 +6,9 @@
     <centralMarkerSize>0.100</centralMarkerSize>  <!-- In m -->
     <centralMarkerPosition>1.500 0.750</centralMarkerPosition>  <!-- Reference frame to center of central marker, in meters -->
     <centralMarkerOrientation>0</centralMarkerOrientation>  <!-- Reference frame to central marker orientation, in degrees -->
+    <centralMarkerDetectionBeforeStart>100</centralMarkerDetectionBeforeStart>  <!-- Number of required detection of the central marker before start-->
+    <averageFilterWeight>30</averageFilterWeight>  <!-- Weight of average filter of the central marker -->
+    <updateCentralMarkerOnline>0</updateCentralMarkerOnline>  <!-- If not the central marker pose will be set once and for all after the detection has started -->
     <markerIds>1 2 3 4 5 6 7 8 9 10 60 61 62 63</markerIds>   <!-- Only those markers can be detected -->
     <markerSize>0.070</markerSize>                <!-- In m -->
     <rate>0</rate>                                <!-- in Hz -->

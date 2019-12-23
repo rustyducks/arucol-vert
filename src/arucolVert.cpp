@@ -44,13 +44,17 @@ void ArucolVert::run() {
   cv::Mat img, debugImg;
   std::cout << "Acquiring central marker, id: " << params.centralMarkerId
             << std::endl;
+  int i = 0;
   while (inputVideo.grab()) {
     inputVideo.retrieve(img);
     if (withDisplay) {
       img.copyTo(debugImg);
     }
     if (updateCentralMarker(img, debugImg)) {
-      break;
+      i++;
+      if (i > params.numberOfCentralMarkerDetectionBeforeStart){
+        break;
+      }
     }
   }
 
@@ -70,7 +74,9 @@ void ArucolVert::run() {
     if (withDisplay) {
       img.copyTo(debugImg);
     }
-    updateCentralMarker(img, debugImg);
+    if (params.updateCentralMarkerWhileRunning){
+      updateCentralMarker(img, debugImg);
+    }
     findPoses(img, debugImg, markerPoses);
     std::cout << markerPoses.size() << std::endl;
     for (auto &it : markerPoses) {
@@ -79,6 +85,7 @@ void ArucolVert::run() {
       std::cout << "Marker : " << it.first << "@" << tvec << std::endl;
     }
     if (withDisplay) {
+      drawFrame(debugImg, centralMarkerPose);
       cv::imshow("Output", debugImg);
       int pressedKey = cv::waitKey(10);
       if (pressedKey == 32){
@@ -112,9 +119,17 @@ bool ArucolVert::updateCentralMarker(const cv::Mat &image,
                           cameraParams.distortionCoeffs, rvecs[0], tvecs[0],
                           0.1);
     }
-    tvecAndRvecToHomogeneousMatrix(tvecs[0], rvecs[0], centralMarkerPose);
+    cv::Matx44d tmp;
+    tvecAndRvecToHomogeneousMatrix(tvecs[0], rvecs[0], tmp);
+    if (centralMarkerPose == cv::Matx44d::zeros()){
+      centralMarkerPose = tmp;
+    }else{
+      averageHomogeneousMatrices(centralMarkerPose, tmp, centralMarkerPose, params.averageFilterWeight);
+    }
+
     centralMarkerPoseInv = centralMarkerPose.inv();
     refToCamera = params.refToCentralMarker * centralMarkerPoseInv;
+
     // std::cout << "Updating central marker pose: " << centralMarkerPose
     //          << std::endl;
     return true;
@@ -201,4 +216,16 @@ ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
 
   return poses.size();
 }
+
+void ArucolVert::drawFrame(cv::Mat& image, const cv::Matx44d& pose) const{
+  std::vector<cv::Point3d> ps = {{0, 0, 0}, {0.1, 0, 0}, {0, 0.1, 0}, {0, 0, 0.1}};
+  cv::Vec3d tvec, rvec;
+  homogeneousMatrixToTvecAndRvec(pose, tvec, rvec);
+  std::vector<cv::Point2d> pps;
+  cv::projectPoints(ps, rvec, tvec, cameraParams.matrix, cameraParams.distortionCoeffs, pps);
+  cv::line(image, pps[0], pps[1], {0, 0, 255}, 5);
+  cv::line(image, pps[0], pps[2], {0, 255, 0}, 5);
+  cv::line(image, pps[0], pps[3], {255, 0, 0}, 5);
+}
+
 } // namespace arucol

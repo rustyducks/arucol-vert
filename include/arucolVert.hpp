@@ -40,6 +40,7 @@ protected:
                          const std::unordered_set<int> &whitelistIds) const;
   size_t findPoses(const cv::Mat &image, cv::Mat &debugImage,
                    std::unordered_map<int, cv::Matx44d> &poses) const;
+  void drawFrame(cv::Mat& image, const cv::Matx44d& pose) const;
 
 protected:
   eState state;

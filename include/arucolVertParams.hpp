@@ -18,6 +18,9 @@ public:
 
   int centralMarkerId;
   double centralMarkerSize;
+  int numberOfCentralMarkerDetectionBeforeStart;
+  int averageFilterWeight;
+  bool updateCentralMarkerWhileRunning;
 
   std::unordered_set<int> validMarkerIds;
   double markerSize;
