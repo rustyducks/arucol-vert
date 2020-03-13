@@ -73,6 +73,12 @@ ArucolVertParams::ArucolVertParams(const std::string &filename) {
       whitelistedMarkers.insert(id);
       markersParams[id] = {id, size, mat};
     }
+
+    fs["filters"]["heightFilter"]["minHeight"] >> heightFilterParams.minHeight;
+    fs["filters"]["heightFilter"]["maxHeight"] >> heightFilterParams.maxHeight;
+
+    fs["filters"]["rotationFilter"]["maxAxisDrift"] >> rotationFilterParams.nonVerticalTolerence;
+
   }
 
 

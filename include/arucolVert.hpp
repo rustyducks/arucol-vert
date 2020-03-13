@@ -23,6 +23,8 @@ struct sMarkers {
   std::vector<std::vector<cv::Point2f>> corners;
 };
 
+typedef std::unordered_map<int, cv::Matx44d> MarkerPoses_t;
+
 class ArucolVert {
 public:
   ArucolVert(const std::string &camaraParametersFilename,
@@ -43,7 +45,11 @@ protected:
 
   std::unordered_map<double, sMarkers> groupMarkersBySize(const sMarkers &markers) const;
   size_t findPoses(const cv::Mat &image, cv::Mat &debugImage,
-                   std::unordered_map<int, cv::Matx44d> &poses) const;
+                   MarkerPoses_t &poses) const;
+
+  size_t filterOnHeight(const MarkerPoses_t &markers, MarkerPoses_t &filteredMarkers) const;
+  size_t filterOnRotation(const MarkerPoses_t &markers, MarkerPoses_t &filteredMarkers) const;
+
   void drawFrame(cv::Mat& image, const cv::Matx44d& pose) const;
 
 protected:

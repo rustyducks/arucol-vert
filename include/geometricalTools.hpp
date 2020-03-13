@@ -139,5 +139,40 @@ inline void axisAngleToRvec(const cv::Vec3d& axis, const double& angle, cv::Vec3
   rvec = angle * rvec;
 }
 
+inline void rvecToEuler(const cv::Vec3d& rvec, cv::Vec3d& eulerAngles){
+  // Returns the Euler Angles representation of a rotation vector in [yaw, pitch, roll] 
+  // Source : https://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToEuler/index.htm
+  cv::Vec3d axis;
+  double angle, x, y, z, roll, pitch, yaw;
+  rvecToAxisAngle(rvec, axis, angle);
+  x = axis[0]; y = axis[1]; z = axis[2];
+  assert(x*x + y*y + z*z == 1);
+  double s=sin(angle);
+	double c=cos(angle);
+	double t=1-c;
+	//  if axis is not already normalised then uncomment this
+	// double magnitude = Math.sqrt(x*x + y*y + z*z);
+	// if (magnitude==0) throw error;
+	// x /= magnitude;
+	// y /= magnitude;
+	// z /= magnitude;
+	if ((x*y*t + z*s) > 0.998) { // north pole singularity detected
+		yaw = 2*atan2(x*sin(angle/2),cos(angle/2));
+		pitch = M_PI/2;
+		roll = 0;
+		return;
+	}
+	if ((x*y*t + z*s) < -0.998) { // south pole singularity detected
+		yaw = -2*atan2(x*sin(angle/2),cos(angle/2));
+		pitch = -M_PI/2;
+		roll = 0;
+		return;
+	}
+	yaw = atan2(y * s- x * z * t , 1 - (y*y+ z*z ) * t);
+	pitch = asin(x * y * t + z * s) ;
+	roll = atan2(x * s - y * z * t , 1 - (x*x + z*z) * t);
+  eulerAngles[0] = yaw; eulerAngles[1] = pitch; eulerAngles[2] = roll;
+}
+
 } // namespace arucol
 #endif /* GEOMETRICALTOOLS_HPP */

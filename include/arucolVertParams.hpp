@@ -12,6 +12,15 @@ struct sMarkerParams{
   cv::Matx44d markerToRobot;
 };
 
+struct sHeightFilterParams{
+  double minHeight;
+  double maxHeight;
+};
+
+struct sRotationFilterParams{
+  double nonVerticalTolerence;
+};
+
 class ArucolVertParams {
 public:
   ArucolVertParams(const std::string &filename);
@@ -31,6 +40,11 @@ public:
 
   std::unordered_map<int, sMarkerParams> markersParams;
   std::unordered_set<int> whitelistedMarkers;
+
+  sHeightFilterParams heightFilterParams;
+  sRotationFilterParams rotationFilterParams;
+
+
 
   double period; // In ms
 };

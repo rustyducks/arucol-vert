@@ -82,7 +82,7 @@ void ArucolVert::run() {
     for (auto &it : markerPoses) {
       cv::Vec3d rvec, tvec;
       homogeneousMatrixToTvecAndRvec(it.second, tvec, rvec);
-      std::cout << "Marker : " << it.first << "@" << tvec << std::endl;
+      std::cout << "Marker : " << it.first << "@" << tvec << " " << cv::normalize(rvec) << std::endl;
     }
     if (withDisplay) {
       drawFrame(debugImg, centralMarkerPose);
@@ -166,7 +166,7 @@ std::unordered_map<double, sMarkers> ArucolVert::groupMarkersBySize(const sMarke
 
 size_t
 ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
-                      std::unordered_map<int, cv::Matx44d> &poses) const {
+                      MarkerPoses_t &poses) const {
   poses.clear();
   std::vector<int> ids;
   std::vector<std::vector<cv::Point2f>> corners;
@@ -252,6 +252,29 @@ void ArucolVert::drawFrame(cv::Mat& image, const cv::Matx44d& pose) const{
   cv::line(image, pps[0], pps[1], {0, 0, 255}, 5);
   cv::line(image, pps[0], pps[2], {0, 255, 0}, 5);
   cv::line(image, pps[0], pps[3], {255, 0, 0}, 5);
+}
+
+size_t ArucolVert::filterOnHeight(const MarkerPoses_t &markers, MarkerPoses_t &filteredMarkers) const{
+  filteredMarkers.clear();
+  for (const auto& p: markers){
+    if (p.second(2,3) <= params.heightFilterParams.maxHeight && p.second(2,3) >= params.heightFilterParams.minHeight){
+      filteredMarkers[p.first] = p.second;
+    }
+  }
+  return filteredMarkers.size();
+}
+size_t ArucolVert::filterOnRotation(const MarkerPoses_t &markers, MarkerPoses_t &filteredMarkers) const{
+  filteredMarkers.clear();
+  cv::Vec3d rVec, tVec;
+  for (const auto& p: markers){
+    homogeneousMatrixToTvecAndRvec(p.second, tVec, rVec);
+    rVec = cv::normalize(rVec);
+    if (abs(rVec[0]) <= params.rotationFilterParams.nonVerticalTolerence 
+          && abs(rVec[1 ]) <= params.rotationFilterParams.nonVerticalTolerence){
+      filteredMarkers[p.first] = p.second;  
+    } 
+  }
+  return filteredMarkers.size();
 }
 
 } // namespace arucol
