@@ -2,8 +2,15 @@
 #define ARUCOLVERTPARAMS_HPP
 #include <opencv2/core/core.hpp>
 #include <unordered_set>
+#include <unordered_map>
 
 namespace arucol {
+
+struct sMarkerParams{
+  int id;
+  double size;
+  cv::Matx44d markerToRobot;
+};
 
 class ArucolVertParams {
 public:
@@ -16,18 +23,16 @@ public:
   unsigned int cameraId;
   std::string videoFileName;
 
-  int centralMarkerId;
-  double centralMarkerSize;
+
+  sMarkerParams centralMarkerParams;  // central marker has markertoref stored in markerToRobot...
   int numberOfCentralMarkerDetectionBeforeStart;
   int averageFilterWeight;
   bool updateCentralMarkerWhileRunning;
 
-  std::unordered_set<int> validMarkerIds;
-  double markerSize;
+  std::unordered_map<int, sMarkerParams> markersParams;
+  std::unordered_set<int> whitelistedMarkers;
 
   double period; // In ms
-
-  cv::Matx44d refToCentralMarker;
 };
 } // namespace arucol
 #endif /* ARUCOLVERTPARAMS_HPP */

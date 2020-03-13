@@ -42,7 +42,7 @@ void ArucolVert::help() {
 void ArucolVert::run() {
   state = AQCUIRING_CENTRAL_MARKER;
   cv::Mat img, debugImg;
-  std::cout << "Acquiring central marker, id: " << params.centralMarkerId
+  std::cout << "Acquiring central marker, id: " << params.centralMarkerParams.id
             << std::endl;
   int i = 0;
   while (inputVideo.grab()) {
@@ -103,18 +103,18 @@ bool ArucolVert::updateCentralMarker(const cv::Mat &image,
   std::vector<int> ids;
   std::vector<std::vector<cv::Point2f>> corners;
   cv::aruco::detectMarkers(image, dictionnary, corners, ids);
-  sMarkers centralMarker =
-      filterMarkers({ids, corners}, {params.centralMarkerId});
+  sMarkers centralMarkers =
+      filterMarkers({ids, corners}, {params.centralMarkerParams.id});
 
-  if (centralMarker.ids.size() == 1) {
+  if (centralMarkers.ids.size() == 1) {
     std::vector<cv::Vec3d> rvecs, tvecs;
     cv::aruco::estimatePoseSingleMarkers(
-        centralMarker.corners, params.centralMarkerSize, cameraParams.matrix,
+        centralMarkers.corners, params.centralMarkerParams.size, cameraParams.matrix,
         cameraParams.distortionCoeffs, rvecs, tvecs);
 
     if (withDisplay) {
-      cv::aruco::drawDetectedMarkers(debugImage, centralMarker.corners,
-                                     centralMarker.ids);
+      cv::aruco::drawDetectedMarkers(debugImage, centralMarkers.corners,
+                                     centralMarkers.ids);
       cv::aruco::drawAxis(debugImage, cameraParams.matrix,
                           cameraParams.distortionCoeffs, rvecs[0], tvecs[0],
                           0.1);
@@ -128,14 +128,14 @@ bool ArucolVert::updateCentralMarker(const cv::Mat &image,
     }
 
     centralMarkerPoseInv = centralMarkerPose.inv();
-    refToCamera = params.refToCentralMarker * centralMarkerPoseInv;
+    refToCamera = params.centralMarkerParams.markerToRobot * centralMarkerPoseInv; // refToCentralMarker is stored in markerToRobot...
 
     // std::cout << "Updating central marker pose: " << centralMarkerPose
     //          << std::endl;
     return true;
-  } else if (centralMarker.ids.size() > 1) {
+  } else if (centralMarkers.ids.size() > 1) {
     std::cout << "Warning: Multiple central markers with id :"
-              << params.centralMarkerId
+              << params.centralMarkerParams.id
               << "found on the same frame. Not updating the pose" << std::endl;
     return false;
   }
@@ -155,6 +155,15 @@ ArucolVert::filterMarkers(const sMarkers &markers,
   return filtered;
 }
 
+std::unordered_map<double, sMarkers> ArucolVert::groupMarkersBySize(const sMarkers &markers) const{
+  std::unordered_map<double, sMarkers> groups;
+  for (size_t i = 0; i < markers.ids.size(); i++){
+    groups[params.markersParams.at(markers.ids[i]).size].ids.push_back(markers.ids[i]);
+    groups[params.markersParams.at(markers.ids[i]).size].corners.push_back(markers.corners[i]);
+  }
+  return groups;
+}
+
 size_t
 ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
                       std::unordered_map<int, cv::Matx44d> &poses) const {
@@ -162,28 +171,43 @@ ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
   std::vector<int> ids;
   std::vector<std::vector<cv::Point2f>> corners;
   cv::aruco::detectMarkers(image, dictionnary, corners, ids);
-  sMarkers markers = filterMarkers({ids, corners}, params.validMarkerIds);
-  if (markers.ids.size() == 0) {
+  sMarkers markers = filterMarkers({ids, corners}, params.whitelistedMarkers);
+  size_t nMarkers = markers.ids.size();
+  if (nMarkers == 0) {
     std::cout << "No marker found" << std::endl;
     return 0;
   }
-  std::vector<cv::Vec3d> rvecs, tvecs;
-  cv::aruco::estimatePoseSingleMarkers(
-      markers.corners, params.markerSize, cameraParams.matrix,
-      cameraParams.distortionCoeffs, rvecs, tvecs);
+  std::cout << "Found " << nMarkers << " filtered markers" << std::endl;
+  std::unordered_map<double, sMarkers> groups = groupMarkersBySize(markers);
 
-  std::vector<cv::Matx44d> camToMarkers;
-  camToMarkers.reserve(markers.ids.size());
-  for (size_t i = 0; i < markers.ids.size(); i++) {
-    cv::Matx44d camToMarker;
-    tvecAndRvecToHomogeneousMatrix(tvecs[i], rvecs[i], camToMarker);
-    poses[markers.ids[i]] = refToCamera * camToMarker;
-    camToMarkers.push_back(camToMarker);
+
+
+  std::vector<int> markersIds;
+  std::vector<cv::Vec3d> rvecs, tvecs, locrvecs, loctvecs;
+  for (const auto& p: groups){
+    cv::aruco::estimatePoseSingleMarkers(p.second.corners, p.first, cameraParams.matrix, cameraParams.distortionCoeffs, locrvecs, loctvecs);
+    rvecs.insert(rvecs.end(), locrvecs.begin(), locrvecs.end());
+    tvecs.insert(tvecs.end(), loctvecs.begin(), loctvecs.end());
+    markersIds.insert(markersIds.end(), p.second.ids.begin(), p.second.ids.end());
   }
 
+  assert(markersIds.size() == nMarkers);
+
+  std::vector<cv::Matx44d> camToMarkers;
+  camToMarkers.reserve(nMarkers);
+  for (size_t i = 0; i < nMarkers; i++) {
+    cv::Matx44d camToMarker;
+    tvecAndRvecToHomogeneousMatrix(tvecs[i], rvecs[i], camToMarker);
+    poses[markersIds[i]] = refToCamera * camToMarker * params.markersParams.at(markersIds[i]).markerToRobot;
+    camToMarkers.push_back(camToMarker * params.markersParams.at(markersIds[i]).markerToRobot);
+  }
+
+  assert(poses.size() == nMarkers);
+
   if (withDisplay) {
-    cv::aruco::drawDetectedMarkers(debugImage, markers.corners, markers.ids);
-    if (markers.ids.size() > 0) {
+    /*cv::aruco::drawDetectedMarkers(debugImage, markers.corners, markers.ids);
+    cv::aruco::drawDetectedMarkers(debugImage, smallMarkers.corners, smallMarkers.ids);*/
+    if (nMarkers > 0) {
       std::vector<cv::Point3d> points;
       std::vector<cv::Point2d> imgPoints;
       cv::Point3d centerPose;
@@ -193,10 +217,11 @@ ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
       centerPose.y = pose[1];
       centerPose.z = pose[2];
       points.push_back(centerPose);
-      for (size_t i = 0; i < markers.ids.size(); i++) {
+      for (size_t i = 0; i < camToMarkers.size(); i++) {
         homogeneousMatrixToTvecAndRvec(camToMarkers[i], pose, rvec);
         cv::Point3d p(pose[0], pose[1], pose[2]);
         points.push_back(p);
+        drawFrame(debugImage, camToMarkers[i]);
       }
 
       cv::projectPoints(points, std::vector<double>({0.0, 0.0, 0.0}),
@@ -207,7 +232,7 @@ ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
       for (size_t i = 1; i < imgPoints.size(); i++){
         cv::line(debugImage, imgPoints[0], imgPoints[i], {0, 0, 255}, 2);
         std::stringstream ss;
-        homogeneousMatrixToTvecAndRvec(poses[markers.ids[i-1]], pose, rvec);
+        homogeneousMatrixToTvecAndRvec(poses[markersIds[i-1]], pose, rvec);
         ss << "x:" << pose[0] << " y:" << pose[1] << " z:" << pose[2];
         cv::putText(debugImage, ss.str(), (imgPoints[0] + imgPoints[i])/2, cv::FONT_HERSHEY_SIMPLEX, 0.7, {0, 0, 255}, 2);
       }
@@ -215,6 +240,7 @@ ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
   }
 
   return poses.size();
+  return 0;
 }
 
 void ArucolVert::drawFrame(cv::Mat& image, const cv::Matx44d& pose) const{

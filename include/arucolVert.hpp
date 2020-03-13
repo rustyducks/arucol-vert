@@ -36,8 +36,12 @@ public:
 
 protected:
   bool updateCentralMarker(const cv::Mat &image, cv::Mat &debugImage);
+
+  // Filters a list of markers, returns only those in "whitelistIds"
   sMarkers filterMarkers(const sMarkers &markers,
                          const std::unordered_set<int> &whitelistIds) const;
+
+  std::unordered_map<double, sMarkers> groupMarkersBySize(const sMarkers &markers) const;
   size_t findPoses(const cv::Mat &image, cv::Mat &debugImage,
                    std::unordered_map<int, cv::Matx44d> &poses) const;
   void drawFrame(cv::Mat& image, const cv::Matx44d& pose) const;

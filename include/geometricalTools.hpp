@@ -72,6 +72,22 @@ homogeneousMatrixFromTranslationRotation2D(const double x, const double y,
                                   0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 }
 
+inline void homogeneousMatrixFromTranslationQuaternion(const cv::Vec3d &tvec, const cv::Vec4d &q, cv::Matx44d &homogeneousMatrix){
+  // Source : https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/index.htm
+  cv::Matx33d ident = cv::Matx33d::eye();
+  cv::Matx33d m1(-q[1]*q[1]-q[2]*q[2], q[0]*q[1], q[0]*q[2],
+                  q[0]*q[1], -q[0]*q[0]-q[2]*q[2], q[1]*q[2],
+                  q[0]*q[2], q[1] * q[2], -q[0]*q[0]-q[1]*q[1]);
+  cv::Matx33d m2(0, -q[2], q[1],
+                 q[2], 0, -q[0],
+                 -q[1], q[0], 0);
+  cv::Matx33d rotMat = ident + 2 * m1 + 2 * q[3] * m2;
+
+  cv::Vec3d rvec;
+  cv::Rodrigues(rotMat, rvec);
+  tvecAndRvecToHomogeneousMatrix(tvec, rvec, homogeneousMatrix);
+}
+
 inline void averageHomogeneousMatrices(const cv::Matx44d &mat1, const cv::Matx44d &mat2, cv::Matx44d &result, const int mat1Weight = 1){
   cv::Vec3d tvec1, tvec2, rvec1, rvec2;
   cv::Matx44d rot1, rot2, tmp;
