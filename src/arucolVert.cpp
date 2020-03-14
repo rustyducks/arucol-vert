@@ -78,11 +78,15 @@ void ArucolVert::run() {
       updateCentralMarker(img, debugImg);
     }
     findPoses(img, debugImg, markerPoses);
+    MarkerPoses_t heightFiltered, rotFiltered;
+    filterOnRotation(markerPoses, heightFiltered);
+    markerPoses = heightFiltered;
     std::cout << markerPoses.size() << std::endl;
     for (auto &it : markerPoses) {
       cv::Vec3d rvec, tvec;
       homogeneousMatrixToTvecAndRvec(it.second, tvec, rvec);
-      std::cout << "Marker : " << it.first << "@" << tvec << " " << cv::normalize(rvec) << std::endl;
+
+      std::cout << "Marker : " << it.first << "@" << tvec << std::endl;
     }
     if (withDisplay) {
       drawFrame(debugImg, centralMarkerPose);
@@ -217,6 +221,7 @@ ArucolVert::findPoses(const cv::Mat &image, cv::Mat &debugImage,
       centerPose.y = pose[1];
       centerPose.z = pose[2];
       points.push_back(centerPose);
+      drawFrame(debugImage, refToCamera.inv());
       for (size_t i = 0; i < camToMarkers.size(); i++) {
         homogeneousMatrixToTvecAndRvec(camToMarkers[i], pose, rvec);
         cv::Point3d p(pose[0], pose[1], pose[2]);
@@ -266,13 +271,21 @@ size_t ArucolVert::filterOnHeight(const MarkerPoses_t &markers, MarkerPoses_t &f
 size_t ArucolVert::filterOnRotation(const MarkerPoses_t &markers, MarkerPoses_t &filteredMarkers) const{
   filteredMarkers.clear();
   cv::Vec3d rVec, tVec;
+  cv::Vec4d z(0.0, 0.0, 1.0, 1.0), z0(0.0, 0.0, 1.0, 0.0);
+  double angle;
   for (const auto& p: markers){
-    homogeneousMatrixToTvecAndRvec(p.second, tVec, rVec);
-    rVec = cv::normalize(rVec);
-    if (abs(rVec[0]) <= params.rotationFilterParams.nonVerticalTolerence 
-          && abs(rVec[1 ]) <= params.rotationFilterParams.nonVerticalTolerence){
-      filteredMarkers[p.first] = p.second;  
-    } 
+    cv::Matx44d rot = p.second;
+    rot(0, 3) = 0.0;
+    rot(1, 3) = 0.0;
+    rot(2, 3) = 0.0;
+    cv::Vec4d zTransform = rot * z;
+
+    angle = acos(zTransform.dot(z0));
+
+    if (angle <= params.rotationFilterParams.nonVerticalAngleTolerance){
+      filteredMarkers[p.first] = p.second;
+    }
+    
   }
   return filteredMarkers.size();
 }

@@ -77,7 +77,8 @@ ArucolVertParams::ArucolVertParams(const std::string &filename) {
     fs["filters"]["heightFilter"]["minHeight"] >> heightFilterParams.minHeight;
     fs["filters"]["heightFilter"]["maxHeight"] >> heightFilterParams.maxHeight;
 
-    fs["filters"]["rotationFilter"]["maxAxisDrift"] >> rotationFilterParams.nonVerticalTolerence;
+    fs["filters"]["rotationFilter"]["angleToVerticalTolerance"] >> rotationFilterParams.nonVerticalAngleTolerance;
+    rotationFilterParams.nonVerticalAngleTolerance = rotationFilterParams.nonVerticalAngleTolerance * M_PI / 180.;
 
   }
 

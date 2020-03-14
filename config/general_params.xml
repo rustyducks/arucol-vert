@@ -43,10 +43,10 @@
     <filters>
         <heightFilter>  <!-- Discards transformed marker positions with an height from the reference frame outside this range-->
             <minHeight>0.38</minHeight>
-            <maxHeight>0.42</maxHeight>
+            <maxHeight>0.47</maxHeight>
         </heightFilter>
         <rotationFilter>  <!-- Discards transformed marker positions if the axis of rotation is not vertical-->
-            <maxAxisDrift>0.075</maxAxisDrift>  <!--In degrees-->
+            <angleToVerticalTolerance>9.0</angleToVerticalTolerance>  <!--In degrees-->
         </rotationFilter>
     </filters>
 </opencv_storage>

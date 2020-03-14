@@ -15,6 +15,15 @@ inline bool isRotationMatrix(cv::Mat &R) {
   return cv::norm(I, shouldBeIdentity) < 1e-6;
 }
 
+inline bool isRotationMatrix(cv::Matx33d &R) {
+  cv::Matx33d Rt;
+  transpose(R, Rt);
+  cv::Matx33d shouldBeIdentity = Rt * R;
+  cv::Matx33d I = cv::Matx33d::eye();
+
+  return cv::norm(I, shouldBeIdentity) < 1e-6;
+}
+
 // Calculates rotation matrix to euler angles
 // The result is the same as MATLAB except the order
 // of the euler angles ( x and z are swapped ).
@@ -53,12 +62,11 @@ inline void tvecAndRvecToHomogeneousMatrix(const cv::Vec3d &tvec,
 
 inline void homogeneousMatrixToTvecAndRvec(const cv::Matx44d &homogeneousMatrix,
                                            cv::Vec3d &tvec, cv::Vec3d &rvec) {
-  cv::Matx33d rotMat(homogeneousMatrix(0, 0), homogeneousMatrix(0, 1),
-                     homogeneousMatrix(0, 2), homogeneousMatrix(1, 0),
-                     homogeneousMatrix(1, 1), homogeneousMatrix(1, 2),
-                     homogeneousMatrix(2, 0), homogeneousMatrix(2, 1),
-                     homogeneousMatrix(2, 2));
+  cv::Matx33d rotMat(homogeneousMatrix(0, 0), homogeneousMatrix(0, 1), homogeneousMatrix(0, 2), 
+                     homogeneousMatrix(1, 0), homogeneousMatrix(1, 1), homogeneousMatrix(1, 2),
+                     homogeneousMatrix(2, 0), homogeneousMatrix(2, 1), homogeneousMatrix(2, 2));
   cv::Rodrigues(rotMat, rvec);
+  assert(isRotationMatrix(rotMat));
   tvec = cv::Vec3d(homogeneousMatrix(0, 3), homogeneousMatrix(1, 3),
                    homogeneousMatrix(2, 3));
 }

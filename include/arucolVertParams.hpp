@@ -18,7 +18,7 @@ struct sHeightFilterParams{
 };
 
 struct sRotationFilterParams{
-  double nonVerticalTolerence;
+  double nonVerticalAngleTolerance;
 };
 
 class ArucolVertParams {
