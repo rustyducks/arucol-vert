@@ -10,6 +10,7 @@
 #include <sstream>
 
 #include "geometricalTools.hpp"
+#include "fileExport.hpp"
 
 namespace arucol {
 
@@ -62,6 +63,9 @@ void ArucolVert::run() {
   state = RUNNING;
   std::unordered_map<int, cv::Matx44d> markerPoses;
   std::chrono::time_point<std::chrono::system_clock> lastFrameTime, now;
+
+  FileExport fe("poses.csv");
+  
   while (inputVideo.grab()) {
     now = std::chrono::high_resolution_clock::now();
     inputVideo.retrieve(img);
@@ -82,12 +86,14 @@ void ArucolVert::run() {
     filterOnRotation(markerPoses, heightFiltered);
     markerPoses = heightFiltered;
     std::cout << markerPoses.size() << std::endl;
+    cv::Vec4d z(0, 0, 1, 1);
     for (auto &it : markerPoses) {
       cv::Vec3d rvec, tvec;
       homogeneousMatrixToTvecAndRvec(it.second, tvec, rvec);
 
       std::cout << "Marker : " << it.first << "@" << tvec << std::endl;
     }
+    fe.addTimeStep(markerPoses);
     if (withDisplay) {
       drawFrame(debugImg, centralMarkerPose);
       cv::imshow("Output", debugImg);
@@ -100,6 +106,8 @@ void ArucolVert::run() {
       }
     }
   }
+
+  fe.write();
 }
 
 bool ArucolVert::updateCentralMarker(const cv::Mat &image,
