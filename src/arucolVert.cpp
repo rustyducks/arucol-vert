@@ -86,14 +86,18 @@ void ArucolVert::run() {
     filterOnRotation(markerPoses, heightFiltered);
     markerPoses = heightFiltered;
     std::cout << markerPoses.size() << std::endl;
-    cv::Vec4d z(0, 0, 1, 1);
     for (auto &it : markerPoses) {
       cv::Vec3d rvec, tvec;
       homogeneousMatrixToTvecAndRvec(it.second, tvec, rvec);
-
       std::cout << "Marker : " << it.first << "@" << tvec << std::endl;
     }
-    fe.addTimeStep(markerPoses);
+    if (markerPoses.size() > 0){
+      cv::Matx44d robotPose;
+      averageMarkerPoses(markerPoses, robotPose);
+      fe.addTimeStep(robotPose);
+    }else{
+      fe.addTimeStep();
+    }
     if (withDisplay) {
       drawFrame(debugImg, centralMarkerPose);
       cv::imshow("Output", debugImg);
@@ -106,6 +110,8 @@ void ArucolVert::run() {
       }
     }
   }
+
+  std::cout << "plop" << std::endl;
 
   fe.write();
 }
@@ -296,6 +302,17 @@ size_t ArucolVert::filterOnRotation(const MarkerPoses_t &markers, MarkerPoses_t 
     
   }
   return filteredMarkers.size();
+}
+
+void ArucolVert::averageMarkerPoses(const MarkerPoses_t &markers, cv::Matx44d& pose) const{
+  cv::Matx44d tmp = cv::Matx44d::eye(), tmp2;
+  int n = 0;
+  for (const auto& p: markers){
+    averageHomogeneousMatrices(tmp, p.second, tmp2, n++);
+    tmp = tmp2;
+    std::cout << tmp <<std::endl;
+  }
+  pose = tmp;
 }
 
 } // namespace arucol

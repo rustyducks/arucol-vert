@@ -50,6 +50,8 @@ protected:
   size_t filterOnHeight(const MarkerPoses_t &markers, MarkerPoses_t &filteredMarkers) const;
   size_t filterOnRotation(const MarkerPoses_t &markers, MarkerPoses_t &filteredMarkers) const;
 
+  void averageMarkerPoses(const MarkerPoses_t &markers, cv::Matx44d& pose) const;
+
   void drawFrame(cv::Mat& image, const cv::Matx44d& pose) const;
 
 protected:

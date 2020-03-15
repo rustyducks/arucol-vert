@@ -19,6 +19,8 @@ public:
     FileExport(const std::string& filename);
 
     void addTimeStep(const MarkerPoses_t& poses);
+    void addTimeStep(const cv::Matx44d& pose);
+    void addTimeStep();
 
     void write() const;
 
