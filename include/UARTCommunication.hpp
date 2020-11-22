@@ -2,15 +2,12 @@
 #define UARTCOMMUNICATION_HPP
 #include <string>
 
-union Message_t;
-
-struct TagMessage;
-
 #define MAX_MSG_BUFFER_SIZE 18
 
 #define SIZE_ArucolPose 18
 #define  ID_ArucolPose 1
 
+namespace arucol{
 struct ArucolPose{
   float theta;
   float x;
@@ -28,11 +25,10 @@ class UARTCommunication{
   UARTCommunication(const std::string& uartFilestream);
   ~UARTCommunication();
 
-  void sendPose(double x, double y, double theta);
+  void sendPose(float x, float y, float theta);
   protected:
   uint16_t computeChecksum(const uint8_t *buffer, const int len) const;
 
-  void arucolPoseFromBytes(union Message_t* msg_u, const uint8_t *buffer) const;
   void arucolPoseToBytes(const struct ArucolPose* msg, uint8_t *buffer) const;
 
   protected:
@@ -41,4 +37,5 @@ class UARTCommunication{
 
   
 };
+}
 #endif /* UARTCOMMUNICATION_HPP */

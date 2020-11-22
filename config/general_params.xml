@@ -49,4 +49,10 @@
             <angleToVerticalTolerance>9.0</angleToVerticalTolerance>  <!--In degrees-->
         </rotationFilter>
     </filters>
+
+    <senders>
+        <uart>
+            <filename>/dev/ttyACM0</filename>
+        </uart>    
+    </senders>
 </opencv_storage>

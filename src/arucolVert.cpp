@@ -11,6 +11,7 @@
 
 #include "geometricalTools.hpp"
 #include "fileExport.hpp"
+#include "UARTCommunication.hpp"
 
 namespace arucol {
 
@@ -63,6 +64,8 @@ void ArucolVert::run() {
   state = RUNNING;
   std::unordered_map<int, cv::Matx44d> markerPoses;
   std::chrono::time_point<std::chrono::system_clock> lastFrameTime, now;
+  UARTCommunication uartComm(params.uartCommParams.filename);
+  cv::Vec3d robotTVec, robotRVec, robotEuler;
 
   FileExport fe("poses.csv");
   
@@ -94,6 +97,9 @@ void ArucolVert::run() {
     if (markerPoses.size() > 0){
       cv::Matx44d robotPose;
       averageMarkerPoses(markerPoses, robotPose);
+      homogeneousMatrixToTvecAndRvec(robotPose, robotTVec, robotRVec);
+      rvecToEuler(robotRVec, robotEuler);
+      uartComm.sendPose(robotTVec[0], robotTVec[1], robotEuler[0]);
       fe.addTimeStep(robotPose);
     }else{
       fe.addTimeStep();
@@ -110,8 +116,6 @@ void ArucolVert::run() {
       }
     }
   }
-
-  std::cout << "plop" << std::endl;
 
   fe.write();
 }

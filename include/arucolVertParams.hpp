@@ -21,6 +21,10 @@ struct sRotationFilterParams{
   double nonVerticalAngleTolerance;
 };
 
+struct sUARTCommParams{
+  std::string filename;
+};
+
 class ArucolVertParams {
 public:
   ArucolVertParams(const std::string &filename);
@@ -43,6 +47,8 @@ public:
 
   sHeightFilterParams heightFilterParams;
   sRotationFilterParams rotationFilterParams;
+
+  sUARTCommParams uartCommParams;
 
 
 

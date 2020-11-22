@@ -7,6 +7,8 @@
 #include <fcntl.h>			//Used for UART
 #include <termios.h>		//Used for UART
 
+namespace arucol{
+
 UARTCommunication::UARTCommunication(const std::string& uartFilestream): filestreamName_(uartFilestream), filestream_(-1){
     filestream_ = open(filestreamName_.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
     if (filestream_ == -1){
@@ -25,11 +27,11 @@ UARTCommunication::UARTCommunication(const std::string& uartFilestream): filestr
 
 UARTCommunication::~UARTCommunication(){
   if (filestream_ > 0){
-    close(uart0_filestream);
+    close(filestream_);
   }
 }
 
-void UARTCommunication::sendPose(double x, double y, double theta){
+void UARTCommunication::sendPose(float x, float y, float theta){
     ArucolPose msg;
     msg.x = x;
     msg.y = y;
@@ -37,7 +39,7 @@ void UARTCommunication::sendPose(double x, double y, double theta){
 
     uint8_t buf[SIZE_ArucolPose];
     arucolPoseToBytes(&msg, buf);
-    write(filestream_, &msg, sizeof(msg));
+    write(filestream_, buf, sizeof(buf));
 }
 
 uint16_t UARTCommunication::computeChecksum(const uint8_t *buffer, int len) const {
@@ -68,14 +70,5 @@ void UARTCommunication::arucolPoseToBytes(const struct ArucolPose* msg, uint8_t 
   buffer[offset++] = (checksum>>8) & 0XFF;
 }
 
-void UARTCommunication::arucolPoseFromBytes(union Message_t* msg_u, const uint8_t *buffer) const{
-  struct ArucolPose* msg = (struct ArucolPose*)msg_u;
-  int offset = 0;
-  memcpy(&msg->theta, buffer+offset, 4);
-  offset += 4;
-  memcpy(&msg->x, buffer+offset, 4);
-  offset += 4;
-  memcpy(&msg->y, buffer+offset, 4);
-  offset += 4;
 }
 
