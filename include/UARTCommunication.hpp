@@ -26,10 +26,11 @@ union Message_t {
 class UARTCommunication{
   public:
   UARTCommunication(const std::string& uartFilestream);
+  ~UARTCommunication();
 
   void sendPose(double x, double y, double theta);
   protected:
-  uint16_t computeCheksum(const uint8_t *buffer, const int len) const;
+  uint16_t computeChecksum(const uint8_t *buffer, const int len) const;
 
   void arucolPoseFromBytes(union Message_t* msg_u, const uint8_t *buffer) const;
   void arucolPoseToBytes(const struct ArucolPose* msg, uint8_t *buffer) const;
