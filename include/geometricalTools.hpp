@@ -3,6 +3,8 @@
 #include <opencv2/calib3d.hpp>
 #include <opencv2/core/types.hpp>
 
+#include <iostream>
+
 namespace arucol {
 
 // Checks if a matrix is a valid rotation matrix.
@@ -176,10 +178,10 @@ inline void rvecToEuler(const cv::Vec3d& rvec, cv::Vec3d& eulerAngles){
 		roll = 0;
 		return;
 	}
-	yaw = atan2(y * s- x * z * t , 1 - (y*y+ z*z ) * t);
-	pitch = asin(x * y * t + z * s) ;
+	pitch = atan2(y * s- x * z * t , 1 - (y*y+ z*z ) * t);
+	yaw = asin(x * y * t + z * s) ;
 	roll = atan2(x * s - y * z * t , 1 - (x*x + z*z) * t);
-  eulerAngles[0] = yaw; eulerAngles[1] = pitch; eulerAngles[2] = roll;
+  eulerAngles[0] = roll; eulerAngles[1] = pitch; eulerAngles[2] = yaw;
 }
 
 } // namespace arucol
