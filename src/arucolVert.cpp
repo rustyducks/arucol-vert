@@ -99,7 +99,7 @@ void ArucolVert::run() {
       averageMarkerPoses(markerPoses, robotPose);
       homogeneousMatrixToTvecAndRvec(robotPose, robotTVec, robotRVec);
       rvecToEuler(robotRVec, robotEuler);
-      uartComm.sendPose(robotTVec[0], robotTVec[1], robotEuler[0]);
+      uartComm.sendPose(robotTVec[0], robotTVec[1], robotEuler[2]);
       fe.addTimeStep(robotPose);
     }else{
       fe.addTimeStep();
