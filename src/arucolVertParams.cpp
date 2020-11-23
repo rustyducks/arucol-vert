@@ -80,6 +80,8 @@ ArucolVertParams::ArucolVertParams(const std::string &filename) {
     fs["filters"]["rotationFilter"]["angleToVerticalTolerance"] >> rotationFilterParams.nonVerticalAngleTolerance;
     rotationFilterParams.nonVerticalAngleTolerance = rotationFilterParams.nonVerticalAngleTolerance * M_PI / 180.;
 
+    fs["senders"]["uart"]["filename"] >> uartCommParams.filename;
+
   }
 
 
